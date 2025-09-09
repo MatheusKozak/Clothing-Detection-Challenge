@@ -3,46 +3,46 @@ import subprocess
 import time
 import shutil
 
-def commit(origem , destino):
+def upload_images(source_dir, destination_dir):
     # Configurações
-    lote = 500                 # número de imagens por commit
-    pausa = 1                  # segundos entre commits
+    batch_size = 500           # number of images per commit
+    pause = 1                  # seconds between commits
 
     # Cria pasta destino se não existir
-    os.makedirs(destino, exist_ok=True)
+    os.makedirs(destination_dir, exist_ok=True)
 
     # Pega todos os arquivos da origem (exceto o script e a pasta images)
-    todos = [f for f in os.listdir(origem)]
-    todos = [f for f in todos if f.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"))]
-    todos.sort()
+    all_files = [f for f in os.listdir(source_dir)]
+    all_files = [f for f in all_files if f.lower().endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"))]
+    all_files.sort()
 
-    print(f"Encontradas {len(todos)} imagens para processar.\n")
+    print(f"Found {len(all_files)} images to process.\n")
 
     commit_id = 1
 
-    for i in range(0, len(todos), lote):
-        grupo = todos[i:i + lote]
+    for i in range(0, len(all_files), batch_size):
+        group = all_files[i:i + batch_size]
 
         # Move imagens para a pasta destino
-        for img in grupo:
-            src = os.path.join(origem, img)
-            dst = os.path.join(destino, img)
+        for img in group:
+            src = os.path.join(source_dir, img)
+            dst = os.path.join(destination_dir, img)
             shutil.move(src, dst)
 
         # Faz git add/commit/push
-        subprocess.run(["git", "add", destino], check=True)
-        subprocess.run(["git", "commit", "-m", f"Commit {commit_id}: {len(grupo)} imagens"], check=True)
+        subprocess.run(["git", "add", destination_dir], check=True)
+        subprocess.run(["git", "commit", "-m", f"Commit {commit_id}: {len(group)} images"], check=True)
         subprocess.run(["git", "push"], check=True)
 
-        print(f"✔ Commit {commit_id} enviado com {len(grupo)} imagens.")
+        print(f"✔ Commit {commit_id} sent with {len(group)} images.")
         commit_id += 1
-        time.sleep(pausa)
+        time.sleep(pause)
 
-    print("\n✅ Upload concluído!")
+    print("\n✅ Upload completed!")
 
 
-origem = ["C:\\Users\\mathe\\Downloads\\PAR2025\\PAR2025\\training_set\\training_set" , "C:\\Users\\mathe\\Downloads\\PAR2025\\PAR2025\\validation_set"]
-destino = ["training_set" , "validation_set"]
+sources = ["C:\\Users\\mathe\\Downloads\\PAR2025\\PAR2025\\training_set\\training_set" , "C:\\Users\\mathe\\Downloads\\PAR2025\\PAR2025\\validation_set"]
+destinations = ["training_set" , "validation_set"]
 
-for i in range(len(origem)):
-    commit(origem[i], destino[i])
+for i in range(len(sources)):
+    upload_images(sources[i], destinations[i])
